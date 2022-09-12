@@ -63,7 +63,7 @@ This section is dedicated for using autoencoder model for dealing with different
   - Output: post_process(software count: 2001)
 ## Model
 
-We have applied the Graph Similarity GNN models over our dataset.
+We have applied the Graph Similarity GNN models over our dataset. The orginal Github Repo is [SimGNN](https://github.com/benedekrozemberczki/SimGNN), the modified version for our dataset is ../src/SimGNN/.
 
 #### SimGNN: [link](https://arxiv.org/abs/1808.05689)
 Run Command:
