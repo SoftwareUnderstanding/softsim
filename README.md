@@ -4,6 +4,10 @@ This project contains the source code for processing raw software into graph rep
 
 # Description
 
+
+## GraphRep
+This Section introduce the process of how to convert and clean the raw softrware into a embedded graph representation dataset for software similarity.
+
 ### Raw Data Obtain
 For obtain the dataset, we use two essential tools: Somef and Inspect4py. The raw data is obtained by the github links provided by [Paper With Code](https://paperswithcode.com/).
 
