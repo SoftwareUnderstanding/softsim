@@ -46,7 +46,7 @@ This section is for getting the numerical similarity metric between two software
 - **select_model_embedding.py**: Use different models for embed the abstract for each software
 - **CalSimScore.py**: Calculate the cosine similarity between embedded abstract
 
-### ae_process
+### AE_process
 This section is dedicated for using autoencoder model for dealing with different length of functions(nodes) in the graph representation of software, an example is givne [Github_Issue](https://github.com/pyg-team/pytorch_geometric/issues/1950)
 
 - **pre_ae_data.py**: this file use pre-trained model for encode the code_tokens into numerical embedding, within this file, we applied the [UniXcoder](https://arxiv.org/abs/2203.03850) model.
