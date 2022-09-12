@@ -66,7 +66,8 @@ This section is dedicated for using autoencoder model for dealing with different
 We have applied the Graph Similarity GNN models over our dataset. 
 
 #### SimGNN: [link](https://arxiv.org/abs/1808.05689)
-  The orginal Github Repo is [SimGNN](https://github.com/benedekrozemberczki/SimGNN), the modified version for our dataset is ../src/SimGNN/.
+The orginal Github Repo is [SimGNN](https://github.com/benedekrozemberczki/SimGNN), the modified version for our dataset is ../src/SimGNN/.
+
 Run Command:
 ```bash
 python src/test.py --data_path path_to_/post_process --json_path path_to_/final_data --score_path path_to_/lean_simcal.csv
