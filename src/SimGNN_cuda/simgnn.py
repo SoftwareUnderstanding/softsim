@@ -193,15 +193,16 @@ class SimGNNTrainer(object):
         return loss
 
     def fit(self):
-        last_loss = 10000
-        patience = 10
-        trigger_times = 0
+
         self.optimizer = torch.optim.Adam(self.model.parameters(),
                                           lr=self.args.learning_rate,
                                           weight_decay=self.args.weight_decay)
         self.model.train()
         epochs = trange(self.args.epochs, leave=True, desc="Epoch")
         for epoch in epochs:
+            last_loss = 10000
+            patience = 5
+            trigger_times = 0
             batches = self.create_batches()
             self.loss_sum = 0
             main_index = 0
