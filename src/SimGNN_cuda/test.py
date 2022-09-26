@@ -4,6 +4,7 @@
 # Author     ：Clark Wang
 # version    ：python 3.x
 import argparse
+import os
 
 import torch
 
@@ -19,17 +20,17 @@ def parameter_parser():
 
     parser.add_argument("--data-path",
                         nargs="?",
-                        default="D:\\Projects\\UPM\\GNN\\data\\final_ae_Data\\",
+                        default="D:\\SoftwareSim\\post_process\\",
 	                help="Json data path for linking.")
 
     parser.add_argument("--json-path",
                         nargs="?",
-                        default="D:\\Projects\\UPM\\GNN\\data\\final_data\\",
+                        default="D:\\SoftwareSim\\final_data\\",
                         help="Folder with graph pair pts.")
 
     parser.add_argument("--score-path",
                         nargs="?",
-                        default="D:\\Projects\\UPM\\GNN\\data\\lean_simcal.csv",
+                        default="D:\\Projects\\UPM\\GNN\\new_big_data.csv",
                         help="DataFrame contains pairs and Sim Score.")
 
     parser.add_argument("--save-path",
@@ -44,7 +45,7 @@ def parameter_parser():
 
     parser.add_argument("--sim_type",
                         type=str,
-                        default='sbert',
+                        default='bin_sbert',
                         help="Where to save the trained model")
 
     parser.set_defaults(histogram=True)
@@ -53,7 +54,7 @@ def parameter_parser():
 
     parser.add_argument("--epochs",
                         type=int,
-                        default=10,
+                        default=5,
                         help="Number of training epochs. Default is 5.")
 
     parser.add_argument("--filters-1",
@@ -83,7 +84,7 @@ def parameter_parser():
 
     parser.add_argument("--batch-size",
                         type=int,
-                        default=512,
+                        default=256,
                         help="Number of graph pairs per batch. Default is 512.")
 
     parser.add_argument("--bins",
@@ -98,7 +99,7 @@ def parameter_parser():
 
     parser.add_argument("--learning-rate",
                         type=float,
-                        default=0.01,
+                        default=0.001,
                         help="Learning rate. Default is 0.002.")
 
     parser.add_argument("--weight-decay",
@@ -121,8 +122,8 @@ args = parameter_parser()
 tab_printer(args)
 print(args.weight_decay)
 device = args.device
-data = torch.rand(3, 5).to(device)
-print(data.device)
+# data = torch.rand(3, 5).to(device)
+# print(data.device)
 
 trainer = SimGNNTrainer(args)
 if args.load_path:
@@ -132,3 +133,16 @@ else:
 trainer.score()
 if args.save_path:
     trainer.save(args.save_path + 'final.pt')
+
+
+# args = parameter_parser()
+#
+# device = args.device
+# result_path = 'D:\\Projects\\UPM\\GNN\\model_folder\\final.pt'
+# args.load_path = result_path
+# trainer = SimGNNTrainer(args)
+# trainer.load()
+# trainer.score()
+
+
+

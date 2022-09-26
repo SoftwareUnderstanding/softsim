@@ -136,8 +136,7 @@ class SimGNNTrainer(object):
         # data = glob.glob(self.args.data_path + '*.pt')
         data = pd.read_csv(self.args.score_path)
         ### Pairs
-        self.testing_pairs= data.sample(frac=0.2)
-
+        self.testing_pairs= data.sample(frac=0.4)
         self.training_pairs = data[~data.index.isin(self.testing_pairs.index)]
         self.testing_pairs = shuffle(self.testing_pairs)
         self.training_pairs = shuffle(self.training_pairs)
@@ -193,6 +192,7 @@ class SimGNNTrainer(object):
         return loss
 
     def fit(self):
+        self.training_loss = []
 
         self.optimizer = torch.optim.Adam(self.model.parameters(),
                                           lr=self.args.learning_rate,
@@ -200,8 +200,8 @@ class SimGNNTrainer(object):
         self.model.train()
         epochs = trange(self.args.epochs, leave=True, desc="Epoch")
         for epoch in epochs:
-            last_loss = 10000
-            patience = 5
+            last_loss = float('inf')
+            patience = 10
             trigger_times = 0
             batches = self.create_batches()
             self.loss_sum = 0
@@ -211,9 +211,11 @@ class SimGNNTrainer(object):
                 main_index = main_index + len(batch)
                 self.loss_sum = self.loss_sum + loss_score * len(batch)
                 loss = self.loss_sum / main_index
+                self.training_loss.append(loss)
                 epochs.set_description(f"Epoch:{epoch} Batch:{index} (Loss=%g)" % round(loss, 5))
                 if loss > last_loss:
                     trigger_times += 1
+
                     print('Trigger Times:', trigger_times)
                     last_loss = loss
                     if trigger_times >= patience:
@@ -223,6 +225,12 @@ class SimGNNTrainer(object):
                     last_loss = loss
             if self.args.save_path:
                 self.save(self.args.save_path + f'epoch_{epoch}.pt')
+        file = open(self.args.save_path + 'training.txt', 'w')
+        for i in self.training_loss:
+            s = str(i) + '\n'
+            file.write(s)
+        file.close()
+
 
 
 
