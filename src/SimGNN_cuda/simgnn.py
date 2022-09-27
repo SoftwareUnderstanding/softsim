@@ -104,9 +104,6 @@ class SimGNN(torch.nn.Module):
         abstract_features_1 = self.convolutional_pass(edge_index_1, features_1)
         abstract_features_2 = self.convolutional_pass(edge_index_2, features_2)
 
-        if self.args.histogram == True:
-            hist = self.calculate_histogram(abstract_features_1,
-                                            torch.t(abstract_features_2))
 
         pooled_features_1 = self.attention(abstract_features_1)
         pooled_features_2 = self.attention(abstract_features_2)
@@ -114,6 +111,10 @@ class SimGNN(torch.nn.Module):
         scores = torch.t(scores)
 
         if self.args.histogram == True:
+            hist = self.calculate_histogram(abstract_features_1,
+                                            torch.t(abstract_features_2))
+            if torch.any(torch.isnan(scores)):
+                scores = torch.where(torch.isnan(scores), torch.full_like(scores, 0), scores)
             scores = torch.cat((scores, hist), dim=1).view(1, -1)
 
         scores = torch.nn.functional.normalize(self.fully_connected_first(scores))
@@ -230,6 +231,30 @@ class SimGNNTrainer(object):
             s = str(i) + '\n'
             file.write(s)
         file.close()
+
+
+    def single_pair(self, single_df):
+        '''
+        :param single_df: a selected repo, and all the other repos
+        :return: ranking
+        '''
+        print("\n\nSingle Graph Testing\n")
+        self.model.eval()
+        res = {
+            'repo':[],
+            'pred':[],
+            'ground':[]
+        }
+        for _, row in single_df.iterrows():
+            data = self.transfer_to_torch(row)
+            ground_truth = data['target'].item()
+            pred = self.model(data).item()
+            res['repo'].append(row['graph_2'])
+            res['pred'].append(pred)
+            res['ground'].append(ground_truth)
+        return res
+
+
 
 
 
