@@ -12,7 +12,7 @@ from tqdm import tqdm, trange
 from torch.nn import functional
 from torch_geometric.nn import GCNConv
 from layers import AttentionModule, TenorNetworkModule
-from utils import process_pair, calculate_loss, format_graph, load_json, load_feature
+from utils import process_pair, calculate_loss, format_graph, load_json, load_feature, none_linear_func
 from sklearn.utils import shuffle
 
 class SimGNN(torch.nn.Module):
@@ -63,6 +63,9 @@ class SimGNN(torch.nn.Module):
         """
         scores = torch.mm(abstract_features_1, abstract_features_2).detach()
         scores = scores.view(-1, 1)
+        if torch.any(torch.isnan(scores)):
+            print(scores)
+            scores = torch.where(torch.isnan(scores), torch.full_like(scores, 0), scores)
         hist = torch.histc(scores, bins=self.args.bins)
         hist = hist/torch.sum(hist)
         hist = hist.view(1, -1)
@@ -113,8 +116,8 @@ class SimGNN(torch.nn.Module):
         if self.args.histogram == True:
             hist = self.calculate_histogram(abstract_features_1,
                                             torch.t(abstract_features_2))
-            if torch.any(torch.isnan(scores)):
-                scores = torch.where(torch.isnan(scores), torch.full_like(scores, 0), scores)
+            # if torch.any(torch.isnan(scores)):
+            #     scores = torch.where(torch.isnan(scores), torch.full_like(scores, 0), scores)
             scores = torch.cat((scores, hist), dim=1).view(1, -1)
 
         scores = torch.nn.functional.normalize(self.fully_connected_first(scores))
@@ -169,7 +172,8 @@ class SimGNNTrainer(object):
         # new_dict['graph_1'], new_dict['graph_2'] = graph_1, graph_2
         new_dict['features_1'] = load_feature(graph_1).to(self.args.device)
         new_dict['features_2'] = load_feature(graph_2).to(self.args.device)
-        new_dict['target'] = torch.from_numpy(np.float64(data[self.args.sim_type]).reshape(1, 1)).view(-1).float().to(self.args.device)
+        new_dict['target'] = torch.from_numpy(np.float64(none_linear_func(self.args.func, data[self.args.sim_type])).reshape(1, 1)).view(-1).float().to(self.args.device)
+        # new_dict['target'] = torch.from_numpy(none_linear_func(self.args.func, new_dict['target'])).view(-1).float().to(self.args.device)
         # new_dict['target'] = data[self.args.sim_type]
         edge_1 = torch.LongTensor(format_graph(json_g_1)).to(self.args.device)
         edge_2 = torch.LongTensor(format_graph(json_g_2)).to(self.args.device)
@@ -202,7 +206,7 @@ class SimGNNTrainer(object):
         epochs = trange(self.args.epochs, leave=True, desc="Epoch")
         for epoch in epochs:
             last_loss = float('inf')
-            patience = 10
+            patience = self.args.patience
             trigger_times = 0
             batches = self.create_batches()
             self.loss_sum = 0
@@ -253,11 +257,6 @@ class SimGNNTrainer(object):
             res['pred'].append(pred)
             res['ground'].append(ground_truth)
         return res
-
-
-
-
-
 
     def score(self):
         print("\n\nModel evaluation.\n")

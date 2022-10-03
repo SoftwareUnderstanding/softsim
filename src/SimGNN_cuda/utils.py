@@ -4,6 +4,8 @@
 # Author     ：Clark Wang
 # version    ：python 3.x
 import math
+
+import numpy as np
 from texttable import Texttable
 import torch
 import json
@@ -29,6 +31,9 @@ def process_pair(path):
     """
     data = torch.load(path)
     return data
+
+def dis_sim(data):
+    data = 2**data
 
 def calculate_loss(prediction, target):
     """
@@ -76,6 +81,30 @@ def format_graph(data):
                 from_list.append(from_node_index)
                 to_list.append(to_node_index)
     return [from_list, to_list]
+
+# def normal_dist(x, sd=0.001):
+#     prob_density = (np.pi*sd) * np.exp(-0.5*((x)/sd)**2)
+#     return prob_density
+
+
+def none_linear_func(lin, data):
+    funcs = {
+        # "cube": lambda x: (x*10)**3,
+        "100": lambda x: x * math.log(x * 100),
+        "1000": lambda x: x * math.log(x * 1000),
+        "10000": lambda x: x*math.log(x*10000),
+        "exp": lambda x: math.exp(math.tanh(x)*2),
+        "tanh": lambda x: 1/(1 - math.tanh(x+0.5)),
+        "none": lambda x: x
+        # "norm" : lambda x: normal_dist(x) if x>=0 else -normal_dist(x)
+        # "con": lambda x: -math.log(x) * 10 if x > 0 else (x * 100)**2
+    }
+    return np.float64(funcs[lin](data))
+# a = none_linear_func('cube', -0.1076)
+# print(a)
+# print(type(a))
+
+
 
 # data = process_pair('D:\\Projects\\UPM\\GNN\\data\\final_ae_Data\\Zasder3_Latent-Neural-Differential-Equations-for-Video-Generation.pt')
 # output = load_feature(data)

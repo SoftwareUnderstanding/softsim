@@ -5,7 +5,7 @@
 # version    ：python 3.x
 import argparse
 import os
-
+import logging
 import torch
 
 from simgnn import *
@@ -30,7 +30,7 @@ def parameter_parser():
 
     parser.add_argument("--score-path",
                         nargs="?",
-                        default="D:\\Projects\\UPM\\GNN\\new_big_data.csv",
+                        default="D:\\Projects\\UPM\\GNN\\full_training.csv",
                         help="DataFrame contains pairs and Sim Score.")
 
     parser.add_argument("--save-path",
@@ -45,7 +45,7 @@ def parameter_parser():
 
     parser.add_argument("--sim_type",
                         type=str,
-                        default='bin_sbert',
+                        default='sbert',
                         help="Where to save the trained model")
 
     parser.set_defaults(histogram=True)
@@ -115,12 +115,22 @@ def parameter_parser():
                         default=torch.device('cuda' if torch.cuda.is_available else 'cpu'),
                         help="Use Cuda or not")
 
+    parser.add_argument("--func",
+                        type=str,
+                        default='1000',
+                        help="None Linear Function")
+
+    parser.add_argument("--patience",
+                        type=int,
+                        default=20,
+                        help="Patience counter for over-fitting, default as 20")
+
     return parser.parse_args()
 
-
+# logging.basicConfig(filename="log.txt")
 args = parameter_parser()
 tab_printer(args)
-print(args.weight_decay)
+print(args.histogram)
 device = args.device
 # data = torch.rand(3, 5).to(device)
 # print(data.device)
@@ -134,6 +144,12 @@ trainer.score()
 if args.save_path:
     trainer.save(args.save_path + 'final.pt')
 
+
+# a = torch.Tensor([[3.3052e+04, 2.2365e+04, np.nan]])
+# if torch.any(torch.isnan(a)):
+#     print('*')
+#     print(torch.any(torch.isnan(a)))
+#     print(torch.where(torch.isnan(a), torch.full_like(a, 0), a))
 
 # args = parameter_parser()
 #
