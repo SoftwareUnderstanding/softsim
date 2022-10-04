@@ -8,8 +8,8 @@ import os
 import logging
 import torch
 
-from simgnn import *
-from utils import *
+from SimGNN_cuda.simgnn import *
+from SimGNN_cuda.utils import *
 
 def parameter_parser():
     """
@@ -30,7 +30,7 @@ def parameter_parser():
 
     parser.add_argument("--score-path",
                         nargs="?",
-                        default="D:\\Projects\\UPM\\GNN\\full_training.csv",
+                        default="D:\\Projects\\UPM\\GNN\\ran_training.csv",
                         help="DataFrame contains pairs and Sim Score.")
 
     parser.add_argument("--save-path",
@@ -45,7 +45,7 @@ def parameter_parser():
 
     parser.add_argument("--sim_type",
                         type=str,
-                        default='sbert',
+                        default='sbert_1000',
                         help="Where to save the trained model")
 
     parser.set_defaults(histogram=True)
@@ -64,12 +64,12 @@ def parameter_parser():
 
     parser.add_argument("--filters-2",
                         type=int,
-                        default=192,
+                        default=256,
                         help="Filters (neurons) in 2nd convolution. Default is 64.")
 
     parser.add_argument("--filters-3",
                         type=int,
-                        default=32,
+                        default=128,
                         help="Filters (neurons) in 2nd convolution. Default is 64.")
 
     parser.add_argument("--tensor-neurons",
@@ -99,12 +99,12 @@ def parameter_parser():
 
     parser.add_argument("--learning-rate",
                         type=float,
-                        default=0.001,
+                        default=0.00005,
                         help="Learning rate. Default is 0.002.")
 
     parser.add_argument("--weight-decay",
                         type=float,
-                        default=5 * 10 ** -4,
+                        default=5 * (10 ** -4),
                         help="Adam weight decay. Default is 5*10^-4.")
 
     parser.add_argument("--histogram",
@@ -122,12 +122,12 @@ def parameter_parser():
 
     parser.add_argument("--patience",
                         type=int,
-                        default=20,
+                        default=50,
                         help="Patience counter for over-fitting, default as 20")
 
     return parser.parse_args()
 
-# logging.basicConfig(filename="log.txt")
+logging.basicConfig(filename="log.txt")
 args = parameter_parser()
 tab_printer(args)
 print(args.histogram)

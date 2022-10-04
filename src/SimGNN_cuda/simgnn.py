@@ -11,8 +11,8 @@ import numpy as np
 from tqdm import tqdm, trange
 from torch.nn import functional
 from torch_geometric.nn import GCNConv
-from layers import AttentionModule, TenorNetworkModule
-from utils import process_pair, calculate_loss, format_graph, load_json, load_feature, none_linear_func
+from SimGNN_cuda.layers import AttentionModule, TenorNetworkModule
+from SimGNN_cuda.utils import process_pair, calculate_loss, format_graph, load_json, load_feature, none_linear_func
 from sklearn.utils import shuffle
 
 class SimGNN(torch.nn.Module):
@@ -64,7 +64,7 @@ class SimGNN(torch.nn.Module):
         scores = torch.mm(abstract_features_1, abstract_features_2).detach()
         scores = scores.view(-1, 1)
         if torch.any(torch.isnan(scores)):
-            print(scores)
+            # print(scores)
             scores = torch.where(torch.isnan(scores), torch.full_like(scores, 0), scores)
         hist = torch.histc(scores, bins=self.args.bins)
         hist = hist/torch.sum(hist)
@@ -81,7 +81,7 @@ class SimGNN(torch.nn.Module):
         features = self.convolution_1(features, edge_index)
         features = torch.nn.functional.relu(features)
         features = torch.nn.functional.dropout(features,
-                                               p=self.args.dropout,
+                                               p=0.8,
                                                training=True)
 
         features = self.convolution_2(features, edge_index)
@@ -91,6 +91,7 @@ class SimGNN(torch.nn.Module):
                                                training=True)
 
         features = self.convolution_3(features, edge_index)
+        # features = torch.from_numpy(np.float64(none_linear_func(self.args.func, features)).reshape(1, 1)).view(-1)
         return features
 
     def forward(self, data):
@@ -103,8 +104,10 @@ class SimGNN(torch.nn.Module):
         edge_index_2 = data["edge_index_2"]
         features_1 = data["features_1"]
         features_2 = data["features_2"]
-
+        # print(edge_index_1.size())
+        # print(features_1.size())
         abstract_features_1 = self.convolutional_pass(edge_index_1, features_1)
+        # print(abstract_features_1.size())
         abstract_features_2 = self.convolutional_pass(edge_index_2, features_2)
 
 
@@ -140,7 +143,7 @@ class SimGNNTrainer(object):
         # data = glob.glob(self.args.data_path + '*.pt')
         data = pd.read_csv(self.args.score_path)
         ### Pairs
-        self.testing_pairs= data.sample(frac=0.4)
+        self.testing_pairs= data.sample(frac=0.3)
         self.training_pairs = data[~data.index.isin(self.testing_pairs.index)]
         self.testing_pairs = shuffle(self.testing_pairs)
         self.training_pairs = shuffle(self.training_pairs)
@@ -172,7 +175,7 @@ class SimGNNTrainer(object):
         # new_dict['graph_1'], new_dict['graph_2'] = graph_1, graph_2
         new_dict['features_1'] = load_feature(graph_1).to(self.args.device)
         new_dict['features_2'] = load_feature(graph_2).to(self.args.device)
-        new_dict['target'] = torch.from_numpy(np.float64(none_linear_func(self.args.func, data[self.args.sim_type])).reshape(1, 1)).view(-1).float().to(self.args.device)
+        new_dict['target'] = torch.from_numpy(np.float64(data[self.args.sim_type]).reshape(1, 1)).view(-1).float().to(self.args.device)
         # new_dict['target'] = torch.from_numpy(none_linear_func(self.args.func, new_dict['target'])).view(-1).float().to(self.args.device)
         # new_dict['target'] = data[self.args.sim_type]
         edge_1 = torch.LongTensor(format_graph(json_g_1)).to(self.args.device)
@@ -188,7 +191,8 @@ class SimGNNTrainer(object):
             target = data['target']
             # data = data.to(self.device)
             prediction = self.model(data).view(1)
-            # print(prediction)
+            # prediction = torch.from_numpy(np.float64(none_linear_func(self.args.func, prediction)).reshape(1, 1))
+            # print(type(prediction))
             # print(target)
             losses = losses + torch.nn.functional.mse_loss(target, prediction)
         losses.backward(retain_graph=True)
@@ -264,9 +268,19 @@ class SimGNNTrainer(object):
         self.scores = []
         self.ground_truth = []
         for _, row in self.testing_pairs.iterrows():
+            # print(row['graph_1'], row['graph_2'])
             data = self.transfer_to_torch(row)
+            # print(data)
+            # print(data['edge_index_1'].size())
+            # print(data['edge_index_2'].size())
+            # print(data['features_1'].size())
+            # print(data['features_2'].size())
+            # print(data['target'].item())
             self.ground_truth.append(data['target'].item())
             prediction = self.model(data).item()
+
+            print(data['target'].item(), prediction)
+            # print(data['target'].item(), prediction)
             # print(prediction)
             self.scores.append(calculate_loss(prediction, data['target'].item()))
         self.print_evaluation()
