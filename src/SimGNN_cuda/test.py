@@ -8,8 +8,8 @@ import os
 import logging
 import torch
 
-from SimGNN_cuda.simgnn import *
-from SimGNN_cuda.utils import *
+from simgnn import *
+from utils import *
 
 def parameter_parser():
     """
