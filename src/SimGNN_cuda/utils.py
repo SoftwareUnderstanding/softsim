@@ -100,11 +100,11 @@ def none_linear_func(lin, data):
         # "con": lambda x: -math.log(x) * 10 if x > 0 else (x * 100)**2
     }
     return np.float64(funcs[lin](data))
-a = none_linear_func('100', 0.1)
-b = none_linear_func('100', 0.9)
-print(a)
-print(b)
-print(type(a))
+# a = none_linear_func('100', 0.1)
+# b = none_linear_func('100', 0.9)
+# print(a)
+# print(b)
+# print(type(a))
 
 
 
