@@ -11,8 +11,8 @@ import numpy as np
 from tqdm import tqdm, trange
 from torch.nn import functional
 from torch_geometric.nn import GCNConv
-from SimGNN_cuda.layers import AttentionModule, TenorNetworkModule
-from SimGNN_cuda.utils import process_pair, calculate_loss, format_graph, load_json, load_feature, none_linear_func
+from layers import AttentionModule, TenorNetworkModule
+from utils import process_pair, calculate_loss, format_graph, load_json, load_feature, none_linear_func
 from sklearn.utils import shuffle
 
 class SimGNN(torch.nn.Module):
