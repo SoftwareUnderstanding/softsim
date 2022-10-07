@@ -4,6 +4,10 @@
 # Author     ：Clark Wang
 # version    ：python 3.x
 import argparse
+import os
+import logging
+import torch
+
 from simgnn import *
 from utils import *
 
@@ -16,22 +20,22 @@ def parameter_parser():
 
     parser.add_argument("--data-path",
                         nargs="?",
-                        default="D:\\Projects\\UPM\\GNN\\data\\final_ae_Data\\",
+                        default="D:\\SoftwareSim\\post_process\\",
 	                help="Json data path for linking.")
 
     parser.add_argument("--json-path",
                         nargs="?",
-                        default="D:\\Projects\\UPM\\GNN\\data\\final_data\\",
+                        default="D:\\SoftwareSim\\final_data\\",
                         help="Folder with graph pair pts.")
 
     parser.add_argument("--score-path",
                         nargs="?",
-                        default="D:\\Projects\\UPM\\GNN\\data\\lean_simcal.csv",
+                        default="D:\\Projects\\UPM\\GNN\\data_process\\val_1.csv",
                         help="DataFrame contains pairs and Sim Score.")
 
     parser.add_argument("--save-path",
                         type=str,
-                        default='D:\\Projects\\UPM\\GNN\\model_folder\\lead_model_3.pt',
+                        default='D:\\Projects\\UPM\\GNN\\model_folder\\',
                         help="Where to save the trained model")
 
     parser.add_argument("--load-path",
@@ -41,7 +45,7 @@ def parameter_parser():
 
     parser.add_argument("--sim_type",
                         type=str,
-                        default='sbert',
+                        default='sbert_100',
                         help="Where to save the trained model")
 
     parser.set_defaults(histogram=True)
@@ -50,7 +54,7 @@ def parameter_parser():
 
     parser.add_argument("--epochs",
                         type=int,
-                        default=10,
+                        default=5,
                         help="Number of training epochs. Default is 5.")
 
     parser.add_argument("--filters-1",
@@ -60,12 +64,17 @@ def parameter_parser():
 
     parser.add_argument("--filters-2",
                         type=int,
-                        default=192,
+                        default=256,
                         help="Filters (neurons) in 2nd convolution. Default is 64.")
 
     parser.add_argument("--filters-3",
                         type=int,
-                        default=32,
+                        default=128,
+                        help="Filters (neurons) in 2nd convolution. Default is 64.")
+
+    parser.add_argument("--filters-4",
+                        type=int,
+                        default=64,
                         help="Filters (neurons) in 2nd convolution. Default is 64.")
 
     parser.add_argument("--tensor-neurons",
@@ -80,8 +89,8 @@ def parameter_parser():
 
     parser.add_argument("--batch-size",
                         type=int,
-                        default=128,
-                        help="Number of graph pairs per batch. Default is 128.")
+                        default=512,
+                        help="Number of graph pairs per batch. Default is 512.")
 
     parser.add_argument("--bins",
                         type=int,
@@ -95,23 +104,40 @@ def parameter_parser():
 
     parser.add_argument("--learning-rate",
                         type=float,
-                        default=0.001,
-                        help="Learning rate. Default is 0.0005.")
+                        default=5 * (10 ** -6),
+                        help="Learning rate. Default is 0.002.")
 
     parser.add_argument("--weight-decay",
                         type=float,
-                        default=5 * 10 ** -4,
+                        default=5 * (10 ** -4),
                         help="Adam weight decay. Default is 5*10^-4.")
 
     parser.add_argument("--histogram",
                         dest="histogram",
                         action="store_true")
 
+    parser.add_argument("--device",
+                        default=torch.device('cuda' if torch.cuda.is_available else 'cpu'),
+                        help="Use Cuda or not")
+
+    parser.add_argument("--func",
+                        type=str,
+                        default='None',
+                        help="None Linear Function")
+
+    parser.add_argument("--patience",
+                        type=int,
+                        default=50,
+                        help="Patience counter for over-fitting, default as 20")
+
     return parser.parse_args()
 
-
+logging.basicConfig(filename="log.txt")
 args = parameter_parser()
 tab_printer(args)
+print(args.histogram)
+device = args.device
+
 trainer = SimGNNTrainer(args)
 if args.load_path:
     trainer.load()
@@ -119,4 +145,23 @@ else:
     trainer.fit()
 trainer.score()
 if args.save_path:
-    trainer.save()
+    trainer.save(args.save_path + 'final.pt')
+
+
+# a = torch.Tensor([[3.3052e+04, 2.2365e+04, np.nan]])
+# if torch.any(torch.isnan(a)):
+#     print('*')
+#     print(torch.any(torch.isnan(a)))
+#     print(torch.where(torch.isnan(a), torch.full_like(a, 0), a))
+
+# args = parameter_parser()
+#
+# device = args.device
+# result_path = 'D:\\Projects\\UPM\\GNN\\model_folder\\final.pt'
+# args.load_path = result_path
+# trainer = SimGNNTrainer(args)
+# trainer.load()
+# trainer.score()
+
+
+
