@@ -127,8 +127,8 @@ def parameter_parser():
 
     parser.add_argument("--patience",
                         type=int,
-                        default=50,
-                        help="Patience counter for over-fitting, default as 20")
+                        default=200,
+                        help="Patience counter for over-fitting, default as 200")
 
     return parser.parse_args()
 
