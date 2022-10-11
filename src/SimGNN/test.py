@@ -43,6 +43,8 @@ def parameter_parser():
                         default=None,
                         help="Load a pretrained model")
 
+    parser.set_defaults(continue_training=True)
+
     parser.add_argument("--sim_type",
                         type=str,
                         default='sbert_100',
@@ -132,7 +134,6 @@ def parameter_parser():
 
     return parser.parse_args()
 
-logging.basicConfig(filename="log.txt")
 args = parameter_parser()
 tab_printer(args)
 print(args.histogram)
@@ -141,6 +142,8 @@ device = args.device
 trainer = SimGNNTrainer(args)
 if args.load_path:
     trainer.load()
+    if args.continue_training:
+        trainer.fit()
 else:
     trainer.fit()
 trainer.score()
