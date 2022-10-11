@@ -219,6 +219,7 @@ class SimGNNTrainer(object):
                                           weight_decay=self.args.weight_decay)
         self.model.train()
         epochs = trange(self.args.epochs, leave=True, desc="Epoch")
+
         for epoch in epochs:
             last_loss = float('inf')
             patience = self.args.patience
@@ -231,6 +232,9 @@ class SimGNNTrainer(object):
                 main_index = main_index + len(batch)
                 self.loss_sum = self.loss_sum + loss_score * len(batch)
                 loss = self.loss_sum / main_index
+                file = open(self.args.save_path + 'training.txt', 'w')
+                s = str(loss) + '\n'
+                file.write(s)
                 self.training_loss.append(loss)
                 epochs.set_description(f"Epoch:{epoch} Batch:{index} (Loss=%g)" % round(loss, 5))
                 if loss > last_loss:
@@ -245,11 +249,11 @@ class SimGNNTrainer(object):
                     last_loss = loss
             if self.args.save_path:
                 self.save(self.args.save_path + f'epoch_{epoch}.pt')
-        file = open(self.args.save_path + 'training.txt', 'w')
-        for i in self.training_loss:
-            s = str(i) + '\n'
-            file.write(s)
-        file.close()
+        # file = open(self.args.save_path + 'training.txt', 'w')
+        # for i in self.training_loss:
+        #     s = str(i) + '\n'
+        #     file.write(s)
+        # file.close()
 
 
     def single_pair(self, single_df):
