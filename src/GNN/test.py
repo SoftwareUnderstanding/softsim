@@ -50,8 +50,8 @@ def parameter_parser():
 
     parser.add_argument("--tensor-neurons",
                         type=int,
-                        default=16,
-                        help="Neurons in tensor network layer. Default is 16.")
+                        default=32,
+                        help="Neurons in tensor network layer. Default is 32.")
 
     parser.add_argument("--batch-size",
                         type=int,
@@ -60,8 +60,8 @@ def parameter_parser():
 
     parser.add_argument("--bins",
                         type=int,
-                        default=16,
-                        help="Similarity score bins. Default is 16.")
+                        default=32,
+                        help="Similarity score bins. Default is 32.")
 
     parser.add_argument("--dropout",
                         type=float,
@@ -118,7 +118,6 @@ def parameter_parser():
 
 args = parameter_parser()
 tab_printer(args)
-print(args.histogram)
 device = args.device
 
 trainer = BaseTrainer(args)
