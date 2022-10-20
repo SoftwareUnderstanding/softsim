@@ -244,6 +244,8 @@ class BaseTrainer(object):
         self.tau_list = []
         self.prec_at_10_list = []
         self.prec_at_20_list = []
+        file_list = ["scores", "rho_list", "tau_list", "prec_at_10_list", "prec_at_20_list"]
+        data_list = [self.scores, self.rho_list, self.tau_list, self.prec_at_10_list, self.prec_at_20_list]
         batches = self.create_batches(self.testing_pairs)
         for index, batch in enumerate(batches):
             self.batch_scores = []
@@ -262,6 +264,11 @@ class BaseTrainer(object):
             self.tau_list.append(kendalltau(self.batch_prediction, self.batch_ground_truth).correlation)
             self.prec_at_10_list.append(precision(self.batch_prediction, self.batch_ground_truth, 10))
             self.prec_at_20_list.append(precision(self.batch_prediction, self.batch_ground_truth, 20))
+        for file_index in range(len(file_list)):
+            data_index = data_list[file_index]
+            with open(self.args.save_path + f'{file_list[file_index]}.txt', 'w') as f:
+                for line in data_index:
+                    f.write(f"{line}\n")
         self.print_evaluation()
 
     def print_evaluation(self):
