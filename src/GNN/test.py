@@ -4,11 +4,10 @@
 # Author     ：Clark Wang
 # version    ：python 3.x
 import argparse
-import torch
 from base_model import *
 
 def parameter_parser():
-    parser = argparse.ArgumentParser(description="Run SimGNN.")
+    parser = argparse.ArgumentParser(description="Run Model.")
 
     parser.add_argument("--data-path",
                         nargs="?",
@@ -32,7 +31,7 @@ def parameter_parser():
 
     parser.add_argument("--load-path",
                         type=str,
-                        default='D:\\Projects\\UPM\\GNN\\SimGNN_cuda\\unfin\\epoch_5.pt',
+                        default=None,
                         help="Load a pretrained model")
 
     parser.add_argument("--sim_type",
@@ -71,7 +70,7 @@ def parameter_parser():
 
     parser.add_argument("--learning-rate",
                         type=float,
-                        default=5 * (10 ** -6),
+                        default=1 * (10 ** -5),
                         help="Learning rate. Default is 0.002.")
 
     parser.add_argument("--weight-decay",
@@ -82,12 +81,12 @@ def parameter_parser():
     parser.add_argument("--feature_length",
                             type=int,
                             default=1024,
-                            help="Filters (neurons) in 1st convolution. Default is 128.")
+                            help="Input Length. Default is 1024.")
 
     parser.add_argument("--mlp_neurons",
                         type=int,
-                        default=64,
-                        help="Filters (neurons) in 1st convolution. Default is 128.")
+                        default=128,
+                        help="MLP Starting Point. Default is 128.")
 
     parser.add_argument("--device",
                             default=torch.device('cuda' if torch.cuda.is_available else 'cpu'),
@@ -96,7 +95,7 @@ def parameter_parser():
     parser.add_argument("--filters",
                             type=str,
                             default='512',
-                            help="Where to save the trained model")
+                            help="Channels of filters eg: 768_512_256")
 
     parser.add_argument("--conv",
                         type=str,
@@ -112,9 +111,23 @@ def parameter_parser():
                         default=200,
                         help="Patience counter for over-fitting, default as 20")
 
+    parser.set_defaults(continue_training=True)
+
     return parser.parse_args()
 
 
-a = parameter_parser()
-trainer = BaseTrainer(a)
-trainer.fit()
+args = parameter_parser()
+tab_printer(args)
+print(args.histogram)
+device = args.device
+
+trainer = BaseTrainer(args)
+if args.load_path:
+    trainer.load()
+    if args.continue_training:
+        trainer.fit()
+else:
+    trainer.fit()
+trainer.score()
+if args.save_path:
+    trainer.save(args.save_path + 'final.pt')
