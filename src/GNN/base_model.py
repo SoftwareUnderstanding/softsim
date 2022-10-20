@@ -16,7 +16,7 @@ from layers import *
 from utils import *
 from sklearn.model_selection import train_test_split
 from GNNLayers import SelectGAT
-
+from scipy.stats import spearmanr, kendalltau
 
 
 class BaseModel(torch.nn.Module):
@@ -58,7 +58,7 @@ class BaseModel(torch.nn.Module):
         self.calculate_bottleneck_features()
         conv = self.conv_layer_dict[self.args.conv]
         constructor = conv['constructor']
-        print(constructor)
+        # print(constructor)
         setattr(self, 'gc{}'.format(1), constructor(**conv['kwargs'][0]))
         for i in range(1, self.gcn_numbers):
             setattr(self, 'gc{}'.format(i + 1), constructor(**conv['kwargs'][i]))
@@ -135,15 +135,15 @@ class BaseTrainer(object):
         self.training_pairs, self.testing_pairs = train_test_split(data, test_size=0.2, random_state=42)
         self.training_pairs, self.validation_pairs = train_test_split(self.training_pairs, test_size=0.2, random_state=42)
 
-    def create_batches(self):
+    def create_batches(self, data):
         """
         Creating batches from the training graph list.
         :return batches: List of lists with batches.
         """
         # random.shuffle(self.training_pairs)
         batches = []
-        for graph in range(0, len(self.training_pairs), self.args.batch_size):
-            batches.append(self.training_pairs[graph:graph+self.args.batch_size])
+        for graph in range(0, len(data), self.args.batch_size):
+            batches.append(data[graph:graph+self.args.batch_size])
         return batches
 
     def transfer_to_torch(self, data):
@@ -197,7 +197,7 @@ class BaseTrainer(object):
             last_loss = float('inf')
             patience = self.args.patience
             trigger_times = 0
-            batches = self.create_batches()
+            batches = self.create_batches(self.training_pairs)
             self.loss_sum = 0
             main_index = 0
 
@@ -239,11 +239,29 @@ class BaseTrainer(object):
         self.model.eval()
         self.scores = []
         self.ground_truth = []
-        for _, row in self.testing_pairs.iterrows():
-            data = self.transfer_to_torch(row)
-            self.ground_truth.append(data['target'].item())
-            prediction = self.model(data).item()
-            self.scores.append(calculate_loss(prediction, data['target'].item()))
+
+        self.rho_list = []
+        self.tau_list = []
+        self.prec_at_10_list = []
+        self.prec_at_20_list = []
+        batches = self.create_batches(self.testing_pairs)
+        for index, batch in enumerate(batches):
+            self.batch_scores = []
+            self.batch_ground_truth = []
+            self.batch_prediction = []
+            for _, row in batch.iterrows():
+                data = self.transfer_to_torch(row)
+                self.batch_ground_truth.append(data['target'].item())
+                self.ground_truth.append(data['target'].item())
+                prediction = self.model(data).item()
+                self.batch_prediction.append(prediction)
+                # prediction_mat = np.float64(prediction).item()
+                self.batch_scores.append(calculate_loss(prediction, data['target'].item()))
+            self.scores.append(np.mean(self.batch_scores))
+            self.rho_list.append(spearmanr(self.batch_prediction, self.batch_ground_truth).correlation)
+            self.tau_list.append(kendalltau(self.batch_prediction, self.batch_ground_truth).correlation)
+            self.prec_at_10_list.append(precision(self.batch_prediction, self.batch_ground_truth, 10))
+            self.prec_at_20_list.append(precision(self.batch_prediction, self.batch_ground_truth, 20))
         self.print_evaluation()
 
     def print_evaluation(self):
@@ -253,8 +271,16 @@ class BaseTrainer(object):
         norm_ged_mean = np.mean(self.ground_truth)
         base_error = np.mean([(n - norm_ged_mean) ** 2 for n in self.ground_truth])
         model_error = np.mean(self.scores)
+        model_rho = np.mean(self.rho_list)
+        model_tau = np.mean(self.tau_list)
+        model_10 = np.mean(self.prec_at_10_list)
+        model_20 = np.mean(self.prec_at_20_list)
         print("\nBaseline error: " + str(round(base_error, 5)) + ".")
         print("\nModel test error: " + str(round(model_error, 5)) + ".")
+        print("\nSpearman's rho: " + str(round(model_rho, 5)) + ".")
+        print("\nKendall's tau: " + str(round(model_tau, 5)) + ".")
+        print("\np@10: " + str(round(model_10, 5)) + ".")
+        print("\np@20: " + str(round(model_20, 5)) + ".")
 
     def save(self, path):
         torch.save(self.model.state_dict(), path)

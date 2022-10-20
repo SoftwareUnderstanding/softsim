@@ -45,7 +45,7 @@ def parameter_parser():
 
     parser.add_argument("--epochs",
                         type=int,
-                        default=5,
+                        default=10,
                         help="Number of training epochs. Default is 5.")
 
     parser.add_argument("--tensor-neurons",
@@ -128,5 +128,5 @@ if args.load_path:
 else:
     trainer.fit()
 trainer.score()
-if args.save_path:
-    trainer.save(args.save_path + 'final.pt')
+# if args.save_path:
+#     trainer.save(args.save_path + 'final.pt')

@@ -81,3 +81,45 @@ def format_graph(data):
                 from_list.append(from_node_index)
                 to_list.append(to_node_index)
     return [from_list, to_list]
+
+
+def calculate_ranking_correlation(rank_corr_function, prediction, target):
+    """
+    Calculating specific ranking correlation for predicted values.
+    :param rank_corr_function: Ranking correlation function.
+    :param prediction: Vector of predicted values.
+    :param target: Vector of ground-truth values.
+    :return ranking: Ranking correlation value.
+    """
+    temp = prediction
+    r_prediction = np.empty_like(temp)
+    r_prediction[temp] = np.arange(len(prediction))
+
+    temp = target
+    r_target = np.empty_like(temp)
+    r_target[temp] = np.arange(len(target))
+
+    return rank_corr_function(r_prediction, r_target).correlation
+
+
+def calculate_prec_at_k(k, prediction, target):
+    """
+    Calculating precision at k.
+    """
+
+    # increase k in case same similarity score values of k-th, (k+i)-th elements
+    target_increase = np.sort(target)[::-1]
+    target_value_sel = (target_increase >= target_increase[k - 1]).sum()
+    target_k = max(k, target_value_sel)
+
+    best_k_pred = prediction.argsort()[::-1][:k]
+    best_k_target = target.argsort()[::-1][:target_k]
+
+    return len(set(best_k_pred).intersection(set(best_k_target))) / k
+
+
+def precision(actual, predicted, k):
+    act_set = set(actual)
+    pred_set = set(predicted[:k])
+    result = len(act_set & pred_set) / float(k)
+    return result
