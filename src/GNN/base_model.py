@@ -200,9 +200,8 @@ class BaseTrainer(object):
             batches = self.create_batches(self.training_pairs)
             self.loss_sum = 0
             main_index = 0
-
+            file = open(self.args.save_path + f'training_{epoch}.txt', 'w')
             for index, batch in tqdm(enumerate(batches), total=len(batches), desc="Batches"):
-                file = open(self.args.save_path + f'training_{epoch}.txt', 'w')
                 loss_score = self.process_batch(batch)
                 main_index = main_index + len(batch)
                 self.loss_sum = self.loss_sum + loss_score * len(batch)
