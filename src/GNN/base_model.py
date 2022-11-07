@@ -10,6 +10,7 @@ import pandas as pd
 import numpy as np
 from tqdm import tqdm, trange
 from torch.nn import functional
+from torch import nn
 from torch_geometric.nn import GCNConv, GATv2Conv, SAGEConv, SuperGATConv
 from sklearn.utils import shuffle
 from layers import *
@@ -127,7 +128,10 @@ class BaseTrainer(object):
         self.setup_model()
 
     def setup_model(self):
-        self.model = BaseModel(self.args).to(self.args.device)
+
+        self.model = BaseModel(self.args)
+        self.model = nn.DataParallel(self.model)
+        self.model.to(self.args.device)
 
     def get_pairs(self):
         # data = glob.glob(self.args.data_path + '*.pt')
