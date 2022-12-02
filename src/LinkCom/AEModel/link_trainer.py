@@ -110,9 +110,10 @@ class trainer(object):
             training_met = np.mean(self.training_loss)
             val_met = np.mean(self.val_score)
             print(f"training_loss: {training_met}, val_loss: {val_met}")
-            self.score()
-            if self.args.save_path:
-                self.save(self.args.save_path + f'epoch_{epoch}.pt')
+            if (epoch + 1) % 20 == 0:
+                self.score()
+                if self.args.save_path:
+                    self.save(self.args.save_path + f'epoch_{epoch}.pt')
 
 
     def score(self):
