@@ -22,7 +22,7 @@ def parameter_parser():
     parser.add_argument("--score-path",
                         nargs="?",
                         # default="D:\\Projects\\UPM\\GNN\\data_process\\training.csv",
-                        default = "D:\\Projects\\LinkCom\\DataEng\\median.csv",
+                        default = "D:\\Projects\\LinkCom\\DataEng\\small.csv",
                         help="DataFrame contains pairs and Sim Score.")
 
     parser.add_argument("--save-path",
@@ -47,7 +47,7 @@ def parameter_parser():
 
     parser.add_argument("--epochs",
                         type=int,
-                        default=10,
+                        default=200,
                         help="Number of training epochs. Default is 5.")
 
     parser.add_argument("--tensor-neurons",

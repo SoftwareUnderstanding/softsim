@@ -139,7 +139,7 @@ class BaseTrainer(object):
     def get_pairs(self):
         # data = glob.glob(self.args.data_path + '*.pt')
         data = pd.read_csv(self.args.score_path)
-        # data = data.sample(frac = 0.2, random_state=42)
+        data = data.sample(frac = 0.1, random_state=42)
         self.training_pairs, self.testing_pairs = train_test_split(data, test_size=0.2, random_state=42)
         self.training_pairs, self.validation_pairs = train_test_split(self.training_pairs, test_size=0.2, random_state=42)
 
@@ -223,9 +223,11 @@ class BaseTrainer(object):
             training_met = np.mean(self.training_loss)
             val_met = np.mean(self.val_score)
             print(f"training_loss: {training_met}, val_loss: {val_met}")
-            self.score()
-            if self.args.save_path:
-                self.save(self.args.save_path + f'epoch_{epoch}.pt')
+
+            if (epoch + 1) % 20 == 0:
+                self.score()
+                if self.args.save_path:
+                    self.save(self.args.save_path + f'epoch_{epoch}.pt')
 
     def score(self):
         print("\n\nModel evaluation.\n")
