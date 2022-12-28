@@ -140,8 +140,9 @@ class BaseTrainer(object):
         # data = glob.glob(self.args.data_path + '*.pt')
         data = pd.read_csv(self.args.score_path)
         # data = data.sample(frac = 0.1, random_state=42)
-        self.training_pairs, self.testing_pairs = train_test_split(data, test_size=0.2, random_state=42)
-        self.training_pairs, self.validation_pairs = train_test_split(self.training_pairs, test_size=0.2, random_state=42)
+        self.training_pairs, self.testing_pairs = train_test_split(data, test_size=0.2, random_state=1)
+        # _, self.testing_pairs = train_test_split(self.testing_pairs, test_size=0.2, random_state=42)
+        self.training_pairs, self.validation_pairs = train_test_split(self.training_pairs, test_size=0.2, random_state=1)
 
     def create_batches(self, data):
         """
@@ -199,6 +200,10 @@ class BaseTrainer(object):
                                           lr=self.args.learning_rate,
                                           weight_decay=self.args.weight_decay)
         self.model.train()
+        if self.args.load_path:
+            starting_epoch = int(self.args.load_path.split('\\')[-1].split("_")[-1])
+        else:
+            starting_epoch = 0
         epochs = trange(self.args.epochs, leave=True, desc="Epoch")
 
         for epoch in epochs:
@@ -227,7 +232,8 @@ class BaseTrainer(object):
             if (epoch + 1) % 20 == 0:
                 self.score()
                 if self.args.save_path:
-                    self.save(self.args.save_path + f'epoch_{epoch}.pt')
+                    epoch_count = epoch + starting_epoch
+                    self.save(self.args.save_path + f'epoch_{epoch_count}.pt')
 
     def score(self):
         print("\n\nModel evaluation.\n")
@@ -277,12 +283,12 @@ class BaseTrainer(object):
         model_tau = np.mean(self.tau_list)
         model_10 = np.mean(self.prec_at_10_list)
         model_20 = np.mean(self.prec_at_20_list)
-        print("\nBaseline error: " + str(round(base_error, 5)) + ".")
-        print("\nModel test error: " + str(round(model_error, 5)) + ".")
-        print("\nSpearman's rho: " + str(round(model_rho, 5)) + ".")
-        print("\nKendall's tau: " + str(round(model_tau, 5)) + ".")
-        print("\np@10: " + str(round(model_10, 5)) + ".")
-        print("\np@20: " + str(round(model_20, 5)) + ".")
+        print("\nBaseline error: " + str(base_error) + ".")
+        print("\nModel test error: " + str(model_error) + ".")
+        print("\nSpearman's rho: " + str(model_rho) + ".")
+        print("\nKendall's tau: " + str(model_tau) + ".")
+        print("\np@10: " + str(model_10) + ".")
+        print("\np@20: " + str(model_20) + ".")
 
     def save(self, path):
         torch.save(self.model.state_dict(), path)
