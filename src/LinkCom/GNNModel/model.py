@@ -229,7 +229,7 @@ class BaseTrainer(object):
             val_met = np.mean(self.val_score)
             print(f"training_loss: {training_met}, val_loss: {val_met}")
 
-            if (epoch + 1) % 20 == 0:
+            if (epoch + 1) % 5 == 0:
                 self.score()
                 if self.args.save_path:
                     epoch_count = epoch + starting_epoch
