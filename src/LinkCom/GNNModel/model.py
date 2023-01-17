@@ -141,8 +141,9 @@ class BaseTrainer(object):
         data = pd.read_csv(self.args.score_path)
         # data = data.sample(frac = 0.1, random_state=42)
         self.training_pairs, self.testing_pairs = train_test_split(data, test_size=0.2, random_state=1)
-        _, self.testing_pairs = train_test_split(self.testing_pairs, test_size=0.2, random_state=1)
         self.training_pairs, self.validation_pairs = train_test_split(self.training_pairs, test_size=0.2, random_state=1)
+#         _, self.testing_pairs = train_test_split(self.testing_pairs, test_size=0.2, random_state=1)
+#         self.training_pairs, self.validation_pairs = train_test_split(self.training_pairs, test_size=0.2, random_state=1)
 
     def create_batches(self, data):
         """
