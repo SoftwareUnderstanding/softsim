@@ -141,7 +141,7 @@ class BaseTrainer(object):
         data = pd.read_csv(self.args.score_path)
         # data = data.sample(frac = 0.1, random_state=42)
         self.training_pairs, self.testing_pairs = train_test_split(data, test_size=0.2, random_state=1)
-        # _, self.testing_pairs = train_test_split(self.testing_pairs, test_size=0.2, random_state=42)
+        _, self.testing_pairs = train_test_split(self.testing_pairs, test_size=0.2, random_state=1)
         self.training_pairs, self.validation_pairs = train_test_split(self.training_pairs, test_size=0.2, random_state=1)
 
     def create_batches(self, data):
@@ -229,11 +229,11 @@ class BaseTrainer(object):
             val_met = np.mean(self.val_score)
             print(f"training_loss: {training_met}, val_loss: {val_met}")
 
-            if (epoch + 1) % 5 == 0:
-                self.score()
-                if self.args.save_path:
-                    epoch_count = epoch + starting_epoch
-                    self.save(self.args.save_path + f'epoch_{epoch_count}.pt')
+            # if (epoch + 1) % 20 == 0:
+            self.score()
+            if self.args.save_path:
+                epoch_count = epoch + starting_epoch
+                self.save(self.args.save_path + f'epoch_{epoch_count}.pt')
 
     def score(self):
         print("\n\nModel evaluation.\n")
