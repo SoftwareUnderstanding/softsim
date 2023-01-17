@@ -231,10 +231,13 @@ class BaseTrainer(object):
             print(f"training_loss: {training_met}, val_loss: {val_met}")
 
             # if (epoch + 1) % 20 == 0:
-            self.score()
             if self.args.save_path:
                 epoch_count = epoch
                 self.save(self.args.save_path + f'epoch_{epoch_count}.pt')
+            self.score()
+#             if self.args.save_path:
+#                 epoch_count = epoch
+#                 self.save(self.args.save_path + f'epoch_{epoch_count}.pt')
 
     def score(self):
         print("\n\nModel evaluation.\n")
