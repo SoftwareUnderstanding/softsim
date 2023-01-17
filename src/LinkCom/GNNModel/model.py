@@ -200,10 +200,10 @@ class BaseTrainer(object):
                                           lr=self.args.learning_rate,
                                           weight_decay=self.args.weight_decay)
         self.model.train()
-        if self.args.load_path:
-            starting_epoch = int(self.args.load_path.split('\\')[-1].split("_")[-1])
-        else:
-            starting_epoch = 0
+        # if self.args.load_path:
+        #     starting_epoch = int(self.args.load_path.split('/')[-1].split("_")[-1])
+        # else:
+        #     starting_epoch = 0
         epochs = trange(self.args.epochs, leave=True, desc="Epoch")
 
         for epoch in epochs:
@@ -230,11 +230,10 @@ class BaseTrainer(object):
             print(f"training_loss: {training_met}, val_loss: {val_met}")
 
             # if (epoch + 1) % 20 == 0:
-            if self.args.save_path:
-                epoch_count = epoch + starting_epoch
-                self.save(self.args.save_path + f'epoch_{epoch_count}.pt')
             self.score()
-            
+            if self.args.save_path:
+                epoch_count = epoch
+                self.save(self.args.save_path + f'epoch_{epoch_count}.pt')
 
     def score(self):
         print("\n\nModel evaluation.\n")
