@@ -1,0 +1,30 @@
+{
+    "@context": "https://w3id.org/codemeta/3.0",
+    "@type": "SoftwareSourceCode",
+    "license": {
+        "name": "Apache License 2.0",
+        "url": "https://raw.githubusercontent.com/SoftwareUnderstanding/softsim/main/LICENSE",
+        "identifier": "https://spdx.org/licenses/Apache-2.0",
+        "spdx_id": "Apache-2.0"
+    },
+    "codeRepository": "https://github.com/SoftwareUnderstanding/softsim",
+    "issueTracker": "https://github.com/SoftwareUnderstanding/softsim/issues",
+    "dateCreated": "2022-06-03",
+    "dateModified": "2022-09-12",
+    "downloadUrl": "https://github.com/SoftwareUnderstanding/softsim/releases",
+    "name": "softsim",
+    "programmingLanguage": [
+        "Jupyter Notebook",
+        "Python"
+    ],
+    "author": [
+        {
+            "@type": "Organization",
+            "@id": "https://github.com/SoftwareUnderstanding"
+        }
+    ],
+    "readme": "https://raw.githubusercontent.com/SoftwareUnderstanding/softsim/main/README.md",
+    "description": [
+        "Repository to store all preparation and cleaning needed for software similarity"
+    ]
+}
